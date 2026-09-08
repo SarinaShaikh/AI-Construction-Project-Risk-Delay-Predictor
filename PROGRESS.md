@@ -46,31 +46,44 @@ construction-risk-predictor/
 
 ## In-Progress Phase
 
+
+---
+
+## In-Progress Phase
+
 ### Phase 1 — Understand SCOPE v0.2 Dataset
 **Objective:** Explore dataset structure, understand projects, activities, dependencies, and data quality.
 
 **Dataset Stats:**
 - 100 projects
 - 9,279 activities
-- 18,176 dependencies
+- 18,176 dependencies (stored in dependencies.csv)
 - 4M+ activity-state records
+- 25 total CSV files
 
-**Tasks:**
-- [ ] Download/access SCOPE v0.2 dataset
-- [ ] Load dataset with pandas
-- [ ] Explore structure: projects table, activities table, dependencies table, activity-state records
-- [ ] Generate summary statistics (#projects, #activities, #dependencies, avg activities/project)
-- [ ] Identify missing values, data quality issues, data types
-- [ ] Check for null/invalid dates, negative durations, circular dependencies
-- [ ] Create data dictionary (column names, meanings, valid values)
-- [ ] Analyze dependency patterns (serial vs parallel chains)
-- [ ] Save initial exploratory analysis to `notebooks/01_dataset_exploration.ipynb`
-- [ ] Create summary report
+**Completed Tasks:**
+- ✅ SCOPE v0.2 dataset accessed (25 CSV files in data/raw/)
+- ✅ Created `src/data/loader.py` — Data loading & validation module
+  - Loads all 25 CSV files with pandas
+  - Validates schema (row counts, columns, nulls, duplicates, referential integrity)
+  - Provides convenience getter functions (get_projects, get_activities, etc.)
+  - Tested and working ✓
+
+**Remaining Tasks:**
+- [ ] Create `notebooks/01_dataset_exploration.ipynb` — Exploratory data analysis notebook
+  - Load data using loader.py
+  - Generate summary statistics (#projects, #activities, #dependencies, avg activities/project)
+  - Analyze delay distributions (observed_delay_days)
+  - Check data quality (missing values, outliers, duplicates)
+  - Resource type analysis
+  - Criticality breakdown
+  - Create visualizations (histograms, distributions, correlations)
+  - Document findings
 
 **Deliverables:**
-- `notebooks/01_dataset_exploration.ipynb` — Jupyter notebook with EDA
-- Data dictionary (Markdown or CSV)
-- Summary statistics visualization
+- `notebooks/01_dataset_exploration.ipynb` — Jupyter notebook with EDA & visualizations
+- Summary statistics (projects, activities, dependencies, delays)
+- Data quality assessment report
 
 ---
 
@@ -231,6 +244,33 @@ construction-risk-predictor/
 
 ---
 
+## Data Model (SCOPE v0.2)
+
+### Core Tables
+- **projects.csv** (100 projects)
+  - Columns: project_id, project_type, floors, area_m2, complexity, contractor_capability, resource_availability, management_maturity, weather_exposure, supply_chain_exposure, technology_maturity, planned_duration_days, planned_cost
+  
+- **activities.csv** (9,279 activities)
+  - Columns: project_id, activity_id, phase, activity_name, resource_type, planned_duration_days, quantity, unit_cost, planned_cost, criticality, status, critical_path, predecessor_count, successor_count
+  
+- **dependencies.csv** (18,176 dependencies)
+  - Columns: project_id, predecessor_id, successor_id, relationship, lag_days
+  - **KEY TABLE for CPM graph construction**
+
+### Supporting Tables
+- **activity_states.csv** (4M+ records) — Daily productivity, weather risk, site access
+- **construction_memory.csv** — Observed delays, rework, risk scores (**ML training labels**)
+- **events.csv**, **environment.csv**, **decisions.csv** — Context & features for ML
+- Plus 14 more tables for procurement, resources, friction, counterfactuals, etc.
+
+### Data Loader
+- **`src/data/loader.py`** — Reusable module for loading & validating all 25 CSV files
+  - Call: `data = load_raw_dataset()` → returns dict of DataFrames
+  - Validates referential integrity, row counts, column names, nulls, duplicates
+  - Getter functions: `get_projects(data)`, `get_activities(data)`, `get_dependencies(data)`, etc.
+
+---
+
 ## Known Gotchas
 
 ### Data Leakage (Phase 4+)
@@ -294,6 +334,7 @@ uv run ruff check --fix
 - **Project-level train/test split** — Prevents data leakage in Phase 4.
 - **NetworkX for CPM** — Mature graph library; well-documented for scheduling problems.
 - **Streamlit for dashboard** — Rapid prototyping, no frontend expertise needed.
+- **Single data loader module** — `src/data/loader.py` is reused across all phases (exploratory, CPM, ML, dashboard).
 
 ---
 
@@ -304,4 +345,4 @@ uv run ruff check --fix
 
 ---
 
-**Last Updated:** Phase 0 Complete — Ready for Phase 1 (Dataset Exploration)
+**Last Updated:** Phase 1 In Progress — loader.py complete, next: exploratory notebook

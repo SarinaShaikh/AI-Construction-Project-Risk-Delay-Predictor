@@ -7,7 +7,12 @@ authors = [
     { name = "Samiya Shaikh", email = "samiyaazgar@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "matplotlib>=3.11.1",
+    "notebook>=7.6.2",
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+]
 
 [project.scripts]
 ai-construction = "ai_construction:main"

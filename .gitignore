@@ -67,3 +67,5 @@ outputs/
 results/
 # Unrelated temporary file
 1NPDPRO5.DOC
+# Raw dataset - keep locally, do not push to GitHub
+data/raw/
