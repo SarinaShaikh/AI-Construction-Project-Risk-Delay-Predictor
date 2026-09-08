@@ -43,6 +43,9 @@ debug.log
 # Generated data & model outputs
 data/processed/
 data/exports/
+
+# Raw dataset (never modify or commit)
+data/raw/
 models/*.pkl
 models/*.joblib
 models/*.h5
@@ -67,5 +70,3 @@ outputs/
 results/
 # Unrelated temporary file
 1NPDPRO5.DOC
-# Raw dataset - keep locally, do not push to GitHub
-data/raw/

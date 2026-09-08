@@ -1,9 +1,9 @@
 # AI Construction Project Risk & Delay Predictor — Progress Tracker
 
 ## Current Status
-**Phase:** 1 (Understand SCOPE v0.2 Dataset)  
-**Last Updated:** 2026-01-XX  
-**Next Task:** Download & explore SCOPE v0.2 dataset structure
+**Phase:** 2 (Data Cleaning & Preparation) — ✅ COMPLETE  
+**Last Updated:** 2026-09-09  
+**Next Task:** Phase 3 — CPM Engine (not started; awaiting approval)
 
 ---
 
@@ -44,66 +44,85 @@ construction-risk-predictor/
 
 ---
 
-## In-Progress Phase
 
+### Phase 1 — Understand SCOPE v0.2 Dataset ✅
+**Objective:** Explore dataset structure, understand projects, activities, dependencies, and data quality.
+
+**Completed:**
+- ✅ Explore complete SCOPE v0.2 dataset contents (`data/raw/SCOPE_v02_Public/`: 18 data files + documentation)
+- ✅ Build file inventory (row/column counts, keys, relationships) — matches DATASET_CATALOG
+- ✅ Validate integrity: no duplicate primary keys, all foreign keys intact, no negative/invalid durations, no orphan dependency references
+- ✅ Verify dependency relationships (FS/FF/SS, lags 0–3) and CPM graph feasibility (single root per project; multiple leaves per project)
+- ✅ Verify project split: 70 train / 15 validation / 15 test, consistent across all 18 tables
+- ✅ Verify no circular dependencies: all 100 project graphs are DAGs (Kahn's algorithm over 18,176 edges)
+- ✅ Verify master_projects_canonical ↔ outcomes consistency: 0 mismatches across 100/100 projects
+- ✅ Determine activity_states is NOT execution-boundary data (uniform timeline coverage; productivity does not stop at planned end)
+- ✅ Establish primary ML target and prediction-time leakage rules
+- ✅ Create `notebooks/01_dataset_exploration.md` exploration & verification report
+
+**Key Decisions:**
+- **Primary ML target (fixed):** event-induced / disruption delay days per activity = `SUM(events.duration_days)` per `(project_id, activity_id)`; `0` when the activity has no events.
+- **Actual schedule slippage cannot be claimed** from this dataset: no reliable actual activity start/finish timestamps exist anywhere (`status` = "Planned" for all 9,279 activities; no project completion dates).
+- **Not used as primary target:** `experienced_event` (~94% positive → highly imbalanced), `decision_delay_days` (sparse, 30.4% coverage), `construction_memory.observed_delay_days` (ambiguous semantics), `activity_states` (not an execution log).
+- **Prediction-time leakage rules established:** observed/future event information, observed delay fields, decision actuals, rework outcomes, and other post-outcome information must NOT be used as predictive features unless a later phase establishes they are available at prediction time. Event-derived information is the target, not an input feature.
+
+**Deliverables:**
+- `notebooks/01_dataset_exploration.md` — Phase 1 exploration & verification report
+- `notebooks/01_dataset_exploration.ipynb` — Phase 1 EDA notebook with visualizations (added on GitHub)
+- `src/data/loader.py` — reusable data loading & validation module (added on GitHub)
+- `reports/phase1_data_quality_report.csv`, `reports/phase1_project_statistics.csv` (added on GitHub)
+- `scripts/verify_master_outcomes.py` — master ↔ outcomes consistency check
+- `scripts/verify_circular_deps.py` — per-project cycle check (Kahn's algorithm)
+- `scripts/verify_activity_states_execution.py` — activity_states execution-boundary check
+- Supporting exploration scripts (`scripts/scope_*.py`, `scripts/scope_*.sh`)
+
+---
+
+### Phase 2 — Data Cleaning & Preparation ✅
+**Objective:** Clean, validate, and prepare data for analysis — reproducibly, without touching raw data.
+
+**Completed:**
+- ✅ Protect raw data: `data/raw/` added to `.gitignore` (with `data/processed/`, `data/exports/`); raw files never modified
+- ✅ Inspect actual raw schema of all 12 core tables (source of truth, not assumptions)
+- ✅ Create deterministic cleaning pipeline `scripts/clean_scope.py` (reads only `data/raw/`, writes only `data/processed/`, exit 0 only if all validations pass)
+- ✅ Clean 12 core tables (projects, activities, dependencies, resources, resource_allocation, environment, activity_states, procurement, events, decisions, rework, outcomes) — no rows lost, no columns dropped
+- ✅ Missing values: 0 missing cells across all 12 tables; no imputation (construction_memory structural missingness preserved in raw, not processed)
+- ✅ Duplicates: 0 exact duplicates, 0 duplicate primary keys, 0 conflicts — nothing removed
+- ✅ Dates: all ISO 8601 `YYYY-MM-DD`, 0 invalid; no fabricated/inferred dates
+- ✅ Durations: no negatives/impossible zeros in any duration field
+- ✅ Dependencies: 18,176 edges, 0 orphans, 0 cross-project, FS/FF/SS preserved, 0 cycles (Kahn) — all 100 graphs are DAGs
+- ✅ Project split: 70/15/15 verified project-level, consistent across all tables
+- ✅ Construct target `target_event_delay_days` = SUM(events.duration_days) per activity (0 if none); 9,279 rows, validated against raw events; stats in `notebooks/02_data_cleaning.md` §12
+- ✅ Leakage: per-field prediction-time availability classification (`data/processed/prediction_time_availability.csv`); events/rework/decision-actuals = outcome; uncertain fields = UNKNOWN
+- ✅ 47 pytest tests in `tests/test_clean_scope.py` — all pass
+- ✅ Create `notebooks/02_data_cleaning.md` — full Phase 2 report (17 sections)
+
+**Key Findings (Phase 2):**
+- All 12 core tables are fully populated, no duplicates, no invalid values — cleaning was validation-heavy, transformation-light (dtype/format normalization only)
+- `environment` timeline spans ~1.25× planned duration per project (post-planned buffer); `activity_states` spans exactly 1.0× planned duration — documented structural properties
+- Raw float artifacts normalized on round-trip (e.g., `0.9382299999999999` → `0.93823`), numerically identical
+- Target mean = 16.7741 over all 9,279 activities (Phase 1's 17.78 was over the 8,756 affected activities only)
+
+**Deliverables:**
+- `scripts/clean_scope.py` — deterministic cleaning pipeline
+- `tests/test_clean_scope.py` — 47 validation tests
+- `data/processed/` — 12 cleaned tables + `targets_event_delay_days.csv` + `prediction_time_availability.csv` + `cleaning_manifest.json` (all git-ignored)
+- `notebooks/02_data_cleaning.md` — Phase 2 report
+- `.gitignore` (modified) — added `data/raw/`
+- `pyproject.toml` (modified) — added `pytest` to dev dependencies (note: `uv.lock` not regenerated — `uv` not installed on this machine; run `uv lock` when available)
 
 ---
 
 ## In-Progress Phase
 
-### Phase 1 — Understand SCOPE v0.2 Dataset
-**Objective:** Explore dataset structure, understand projects, activities, dependencies, and data quality.
-
-**Dataset Stats:**
-- 100 projects
-- 9,279 activities
-- 18,176 dependencies (stored in dependencies.csv)
-- 4M+ activity-state records
-- 25 total CSV files
-
-**Completed Tasks:**
-- ✅ SCOPE v0.2 dataset accessed (25 CSV files in data/raw/)
-- ✅ Created `src/data/loader.py` — Data loading & validation module
-  - Loads all 25 CSV files with pandas
-  - Validates schema (row counts, columns, nulls, duplicates, referential integrity)
-  - Provides convenience getter functions (get_projects, get_activities, etc.)
-  - Tested and working ✓
-
-**Remaining Tasks:**
-- [ ] Create `notebooks/01_dataset_exploration.ipynb` — Exploratory data analysis notebook
-  - Load data using loader.py
-  - Generate summary statistics (#projects, #activities, #dependencies, avg activities/project)
-  - Analyze delay distributions (observed_delay_days)
-  - Check data quality (missing values, outliers, duplicates)
-  - Resource type analysis
-  - Criticality breakdown
-  - Create visualizations (histograms, distributions, correlations)
-  - Document findings
-
-**Deliverables:**
-- `notebooks/01_dataset_exploration.ipynb` — Jupyter notebook with EDA & visualizations
-- Summary statistics (projects, activities, dependencies, delays)
-- Data quality assessment report
+None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
 
 ---
 
 ## Upcoming Phases
 
-### Phase 2 — Data Cleaning & Preparation
-**Objective:** Clean, validate, and prepare data for analysis.
-
-- [ ] Handle missing values (dates, durations, resource info)
-- [ ] Standardize date formats (ISO 8601)
-- [ ] Validate durations (no negative values)
-- [ ] Remove/flag duplicate activities
-- [ ] Validate dependency relationships (no circular deps)
-- [ ] Create cleaned dataset in `data/processed/`
-- [ ] Document all transformations
-
----
-
 ### Phase 3 — CPM Engine
-**Objective:** Implement Critical Path Method calculations.
+**Objective:** Implement Critical Path Method calculations (not started).
 
 - [ ] Build dependency graph with NetworkX
 - [ ] Calculate ES (Earliest Start), EF (Earliest Finish)
@@ -345,4 +364,4 @@ uv run ruff check --fix
 
 ---
 
-**Last Updated:** Phase 1 In Progress — loader.py complete, next: exploratory notebook
+**Last Updated:** Phase 2 Complete — Ready for Phase 3 (CPM Engine)
