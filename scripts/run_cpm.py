@@ -41,12 +41,14 @@ def load_csv(path: Path) -> list[dict[str, str]]:
 
 def run():
     print(f"[{datetime.now(tz=UTC):%H:%M:%S}] Loading cleaned data from {PROCESSED}")
-    
-    # Load all processed data
-    activities_raw = load_csv(PROCESSED / "activities.csv")
-    dependencies_raw = load_csv(PROCESSED / "dependencies.csv")
-    projects_raw = load_csv(PROCESSED / "projects.csv")
-    
+
+    # Load raw dataset files
+    RAW = REPO_ROOT / "data" / "raw"
+
+    activities_raw = load_csv(RAW / "activities.csv")
+    dependencies_raw = load_csv(RAW / "dependencies.csv")
+    projects_raw = load_csv(RAW / "master_projects_canonical.csv")
+
     print(f"  activities: {len(activities_raw)} rows")
     print(f"  dependencies: {len(dependencies_raw)} rows")
     print(f"  projects: {len(projects_raw)} rows")

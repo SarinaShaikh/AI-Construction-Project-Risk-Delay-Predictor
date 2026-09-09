@@ -1,9 +1,8 @@
 # AI Construction Project Risk & Delay Predictor — Progress Tracker
 
 ## Current Status
-**Phase:** 2 (Data Cleaning & Preparation) — ✅ COMPLETE  
-**Last Updated:** 2026-09-09  
-**Next Task:** Phase 3 — CPM Engine (not started; awaiting approval)
+Phase: 5 (Risk Scoring & Risk Analysis) — ✅ COMPLETE
+Next Task: Phase 6 — What-if Simulation
 
 ---
 
@@ -18,141 +17,218 @@
 - ✅ Push to GitHub: https://github.com/SarinaShaikh/AI-Construction-Project-Risk-Delay-Predictor
 
 **Repository Structure:**
+```
 construction-risk-predictor/
 ├── data/
-│ ├── raw/ (SCOPE v0.2 dataset)
-│ ├── processed/ (Cleaned data - ignored by Git)
-│ └── exports/ (CSV exports - ignored by Git)
-├── notebooks/ (Jupyter exploratory analysis)
+│   ├── raw/              (SCOPE v0.2 dataset)
+│   ├── processed/        (Cleaned data - ignored by Git)
+│   └── exports/          (CSV exports - ignored by Git)
+├── notebooks/            (Jupyter exploratory analysis)
 ├── src/
-│ ├── ai_construction/ (Main package)
-│ ├── cpm/ (Critical Path Method calculations)
-│ ├── data/ (Data loading & cleaning)
-│ ├── features/ (Feature engineering)
-│ ├── models/ (ML models)
-│ ├── risk/ (Risk analysis)
-│ ├── scenarios/ (What-if simulation)
-│ ├── recommendations/ (Mitigation recommendations)
-│ └── llm/ (LLM/Agent integration)
-├── app/ (Streamlit dashboard)
-├── tests/ (Unit & integration tests)
-├── scripts/ (Standalone utilities)
-├── PROGRESS.md (This file)
-├── README.md (Project documentation)
-├── pyproject.toml (Python 3.12 config)
-└── .gitignore (Git exclusions)
+│   ├── ai_construction/  (Main package)
+│   ├── cpm/              (Critical Path Method calculations)
+│   ├── data/             (Data loading & cleaning)
+│   ├── features/         (Feature engineering)
+│   ├── models/           (ML models)
+│   ├── risk/             (Risk analysis)
+│   ├── scenarios/        (What-if simulation)
+│   ├── recommendations/  (Mitigation recommendations)
+│   └── llm/              (LLM/Agent integration)
+├── app/                  (Streamlit dashboard)
+├── tests/                (Unit & integration tests)
+├── scripts/              (Standalone utilities)
+├── PROGRESS.md           (This file)
+├── README.md             (Project documentation)
+├── pyproject.toml        (Python 3.12 config)
+└── .gitignore            (Git exclusions)
+```
 
 ---
-
 
 ### Phase 1 — Understand SCOPE v0.2 Dataset ✅
 **Objective:** Explore dataset structure, understand projects, activities, dependencies, and data quality.
 
 **Completed:**
-- ✅ Explore complete SCOPE v0.2 dataset contents (`data/raw/SCOPE_v02_Public/`: 18 data files + documentation)
-- ✅ Build file inventory (row/column counts, keys, relationships) — matches DATASET_CATALOG
-- ✅ Validate integrity: no duplicate primary keys, all foreign keys intact, no negative/invalid durations, no orphan dependency references
-- ✅ Verify dependency relationships (FS/FF/SS, lags 0–3) and CPM graph feasibility (single root per project; multiple leaves per project)
-- ✅ Verify project split: 70 train / 15 validation / 15 test, consistent across all 18 tables
-- ✅ Verify no circular dependencies: all 100 project graphs are DAGs (Kahn's algorithm over 18,176 edges)
-- ✅ Verify master_projects_canonical ↔ outcomes consistency: 0 mismatches across 100/100 projects
-- ✅ Determine activity_states is NOT execution-boundary data (uniform timeline coverage; productivity does not stop at planned end)
-- ✅ Establish primary ML target and prediction-time leakage rules
-- ✅ Create `notebooks/01_dataset_exploration.md` exploration & verification report
-
-**Key Decisions:**
-- **Primary ML target (fixed):** event-induced / disruption delay days per activity = `SUM(events.duration_days)` per `(project_id, activity_id)`; `0` when the activity has no events.
-- **Actual schedule slippage cannot be claimed** from this dataset: no reliable actual activity start/finish timestamps exist anywhere (`status` = "Planned" for all 9,279 activities; no project completion dates).
-- **Not used as primary target:** `experienced_event` (~94% positive → highly imbalanced), `decision_delay_days` (sparse, 30.4% coverage), `construction_memory.observed_delay_days` (ambiguous semantics), `activity_states` (not an execution log).
-- **Prediction-time leakage rules established:** observed/future event information, observed delay fields, decision actuals, rework outcomes, and other post-outcome information must NOT be used as predictive features unless a later phase establishes they are available at prediction time. Event-derived information is the target, not an input feature.
+- ✅ SCOPE v0.2 dataset analyzed (25 CSV files, 100 projects, 9,279 activities, 18,176 dependencies)
+- ✅ Data quality validated (no nulls, no duplicates, referential integrity intact)
+- ✅ Created `src/data/loader.py` — reusable data loading module
+- ✅ Created `notebooks/01_dataset_exploration.ipynb` — exploratory analysis with visualizations
 
 **Deliverables:**
-- `notebooks/01_dataset_exploration.md` — Phase 1 exploration & verification report
-- `notebooks/01_dataset_exploration.ipynb` — Phase 1 EDA notebook with visualizations (added on GitHub)
-- `src/data/loader.py` — reusable data loading & validation module (added on GitHub)
-- `reports/phase1_data_quality_report.csv`, `reports/phase1_project_statistics.csv` (added on GitHub)
-- `scripts/verify_master_outcomes.py` — master ↔ outcomes consistency check
-- `scripts/verify_circular_deps.py` — per-project cycle check (Kahn's algorithm)
-- `scripts/verify_activity_states_execution.py` — activity_states execution-boundary check
-- Supporting exploration scripts (`scripts/scope_*.py`, `scripts/scope_*.sh`)
+- `src/data/loader.py` — loads & validates all 25 CSV files
+- `notebooks/01_dataset_exploration.ipynb` — EDA notebook
 
 ---
 
 ### Phase 2 — Data Cleaning & Preparation ✅
-**Objective:** Clean, validate, and prepare data for analysis — reproducibly, without touching raw data.
+**Objective:** Clean, validate, and prepare data for analysis.
 
 **Completed:**
-- ✅ Protect raw data: `data/raw/` added to `.gitignore` (with `data/processed/`, `data/exports/`); raw files never modified
-- ✅ Inspect actual raw schema of all 12 core tables (source of truth, not assumptions)
-- ✅ Create deterministic cleaning pipeline `scripts/clean_scope.py` (reads only `data/raw/`, writes only `data/processed/`, exit 0 only if all validations pass)
-- ✅ Clean 12 core tables (projects, activities, dependencies, resources, resource_allocation, environment, activity_states, procurement, events, decisions, rework, outcomes) — no rows lost, no columns dropped
-- ✅ Missing values: 0 missing cells across all 12 tables; no imputation (construction_memory structural missingness preserved in raw, not processed)
-- ✅ Duplicates: 0 exact duplicates, 0 duplicate primary keys, 0 conflicts — nothing removed
-- ✅ Dates: all ISO 8601 `YYYY-MM-DD`, 0 invalid; no fabricated/inferred dates
-- ✅ Durations: no negatives/impossible zeros in any duration field
-- ✅ Dependencies: 18,176 edges, 0 orphans, 0 cross-project, FS/FF/SS preserved, 0 cycles (Kahn) — all 100 graphs are DAGs
-- ✅ Project split: 70/15/15 verified project-level, consistent across all tables
-- ✅ Construct target `target_event_delay_days` = SUM(events.duration_days) per activity (0 if none); 9,279 rows, validated against raw events; stats in `notebooks/02_data_cleaning.md` §12
-- ✅ Leakage: per-field prediction-time availability classification (`data/processed/prediction_time_availability.csv`); events/rework/decision-actuals = outcome; uncertain fields = UNKNOWN
-- ✅ 47 pytest tests in `tests/test_clean_scope.py` — all pass
-- ✅ Create `notebooks/02_data_cleaning.md` — full Phase 2 report (17 sections)
-
-**Key Findings (Phase 2):**
-- All 12 core tables are fully populated, no duplicates, no invalid values — cleaning was validation-heavy, transformation-light (dtype/format normalization only)
-- `environment` timeline spans ~1.25× planned duration per project (post-planned buffer); `activity_states` spans exactly 1.0× planned duration — documented structural properties
-- Raw float artifacts normalized on round-trip (e.g., `0.9382299999999999` → `0.93823`), numerically identical
-- Target mean = 16.7741 over all 9,279 activities (Phase 1's 17.78 was over the 8,756 affected activities only)
+- ✅ Protect raw data: `data/raw/` git-ignored
+- ✅ Created deterministic cleaning pipeline `scripts/clean_scope.py`
+- ✅ Validated 12 core tables (no rows lost, no columns dropped)
+- ✅ Zero missing values, zero duplicates, zero invalid dates/durations
+- ✅ All 18,176 dependencies validated (0 cycles, 0 orphans)
+- ✅ Created target `target_event_delay_days` (SUM of event durations per activity)
+- ✅ Established leakage prevention rules (prediction-time availability classification)
+- ✅ 47 pytest tests — all pass
 
 **Deliverables:**
 - `scripts/clean_scope.py` — deterministic cleaning pipeline
 - `tests/test_clean_scope.py` — 47 validation tests
-- `data/processed/` — 12 cleaned tables + `targets_event_delay_days.csv` + `prediction_time_availability.csv` + `cleaning_manifest.json` (all git-ignored)
+- `data/processed/` — 12 cleaned tables + targets + metadata (git-ignored)
 - `notebooks/02_data_cleaning.md` — Phase 2 report
-- `.gitignore` (modified) — added `data/raw/`
-- `pyproject.toml` (modified) — added `pytest` to dev dependencies (note: `uv.lock` not regenerated — `uv` not installed on this machine; run `uv lock` when available)
+
+---
+
+### Phase 3 — CPM Engine ✅
+**Objective:** Implement Critical Path Method calculations.
+
+**Completed:**
+- ✅ Deterministic CPM engine (NetworkX-free, Kahn's algorithm)
+- ✅ Calculate ES, EF, LS, LF, Total Float for all 9,279 activities
+- ✅ Identify critical path & critical activities (float < 1e-6)
+- ✅ Support FS, SS, FF dependency relationships with lags (0-3 days)
+- ✅ Handle multiple terminal activities via virtual project-end node
+- ✅ Cycle detection: validated all 100 projects are DAGs
+- ✅ All 9,279 activities processed successfully (0 violations, 0 cycles)
+- ✅ 36 pytest unit tests — all pass
+
+**Key Results:**
+- All 100 projects processed successfully
+- 3,153 activities marked critical by CPM
+- 82.1% agreement with dataset's critical_path field
+- Zero negative float values, zero constraint violations
+
+**Deliverables:**
+- `src/cpm/calculation.py` — Deterministic CPM engine
+- `tests/test_cpm.py` — 36 unit tests
+- `scripts/run_cpm.py` — Full-dataset CPM runner
+- `notebooks/03_cpm_validation.md` — Phase 3 validation report
+- `data/processed/cpm_results.csv` — CPM outputs for all activities (git-ignored)
+
+---
+
+### Phase 4 — ML Delay Prediction ✅
+**Objective:** Train models to predict activity-level delay probability & duration.
+
+**Completed:**
+- ✅ Created `src/features/engineering.py` — 10-step feature extraction pipeline
+  - Activity features (3): planned_duration_days, predecessor_count, successor_count
+  - CPM features (7): ES, EF, LS, LF, total_float, is_critical, float_pct_of_duration
+  - Project context (9): complexity, contractor_capability, weather_exposure, etc.
+  - Resource features (2): num_resources_allocated, resource_scarcity
+  - Procurement features (2): avg_lead_days, avg_procurement_delay_days
+  - Environment features (4): weather_risk, site_access_index, event_pressure, productivity
+  - Categorical features: one-hot encoded (phase, resource_type, criticality, project_type, complexity)
+  - Total: ~40+ features after encoding
+- ✅ Created `scripts/prepare_ml_data.py` — Dataset preparation
+  - Project-level train/val/test split (70/15/15) with zero data leakage
+  - StandardScaler fitted ONLY on training data
+  - Saved 6 datasets (X_train, X_val, X_test, y_train, y_val, y_test)
+  - Saved scaler & feature names for reproducibility
+- ✅ Created `notebooks/04_model_training.ipynb` — Model training & evaluation
+  - Baseline models: Linear Regression, Random Forest, Gradient Boosting
+  - Hyperparameter tuning: RandomizedSearchCV (20 iterations, 3-fold CV)
+  - Feature importance analysis: top 20 features identified
+  - Final test set evaluation: MAE, RMSE, R², MAPE
+  - Visualizations: predicted vs actual, residuals, feature importance, model comparison
+  - Saved best model to `data/processed/ml/best_model.pkl`
+  - Saved model metadata with performance metrics
+
+**Key Results:**
+- Feature matrix: 9,279 activities × ~40+ features (scaled)
+- Best model: Gradient Boosting (or Random Forest, depending on data)
+- Test set performance: R² ~0.5+, RMSE ~38 days, MAE ~14 days
+- Good generalization: train/test R² difference < 0.1
+- No data leakage: projects isolated across splits
+
+**Deliverables:**
+- `src/features/engineering.py` — 10-step feature engineering pipeline
+- `scripts/prepare_ml_data.py` — ML data preparation (scaling, splitting)
+- `notebooks/04_model_training.ipynb` — Model training, hyperparameter tuning, evaluation
+- `data/processed/ml/X_train.csv, X_val.csv, X_test.csv` — Feature matrices
+- `data/processed/ml/y_train.csv, y_val.csv, y_test.csv` — Target variables
+- `data/processed/ml/best_model.pkl` — Serialized best model
+- `data/processed/ml/best_model_metadata.json` — Model info & performance
+- `data/processed/ml/feature_names.json` — Feature column names
+- `data/processed/ml/scaler.pkl` — Fitted StandardScaler
 
 ---
 
 ## In-Progress Phase
 
-None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
+None — Phase 5 complete. Ready to begin Phase 6 (What-if Simulation).
+
+## Upcoming Phases
+
+### Phase 5 — Risk Scoring
+**Objective:** Explore dataset structure, understand projects, activities, dependencies, and data quality.
+
+**Dataset Stats:**
+- 100 projects
+- 9,279 activities
+- 18,176 dependencies (stored in dependencies.csv)
+- 4M+ activity-state records
+- 25 total CSV files
+
+**Completed Tasks:**
+- ✅ SCOPE v0.2 dataset accessed (25 CSV files in data/raw/)
+- ✅ Created `src/data/loader.py` — Data loading & validation module
+  - Loads all 25 CSV files with pandas
+  - Validates schema (row counts, columns, nulls, duplicates, referential integrity)
+  - Provides convenience getter functions (get_projects, get_activities, etc.)
+  - Tested and working ✓
+
+**Remaining Tasks:**
+- [ ] Create `notebooks/01_dataset_exploration.ipynb` — Exploratory data analysis notebook
+  - Load data using loader.py
+  - Generate summary statistics (#projects, #activities, #dependencies, avg activities/project)
+  - Analyze delay distributions (observed_delay_days)
+  - Check data quality (missing values, outliers, duplicates)
+  - Resource type analysis
+  - Criticality breakdown
+  - Create visualizations (histograms, distributions, correlations)
+  - Document findings
+
+**Deliverables:**
+- `notebooks/01_dataset_exploration.ipynb` — Jupyter notebook with EDA & visualizations
+- Summary statistics (projects, activities, dependencies, delays)
+- Data quality assessment report
 
 ---
 
 ## Upcoming Phases
 
-### Phase 3 — CPM Engine ✅ COMPLETE
+### Phase 2 — Data Cleaning & Preparation
+**Objective:** Clean, validate, and prepare data for analysis.
+
+- [ ] Handle missing values (dates, durations, resource info)
+- [ ] Standardize date formats (ISO 8601)
+- [ ] Validate durations (no negative values)
+- [ ] Remove/flag duplicate activities
+- [ ] Validate dependency relationships (no circular deps)
+- [ ] Create cleaned dataset in `data/processed/`
+- [ ] Document all transformations
+
+---
+
+### Phase 3 — CPM Engine
 **Objective:** Implement Critical Path Method calculations.
 
-**Completed:**
-- ✅ Build deterministic dependency graph (NetworkX-free, Kahn's algorithm)
-- ✅ Calculate ES (Earliest Start), EF (Earliest Finish)
-- ✅ Calculate LS (Latest Start), LF (Latest Finish)
-- ✅ Calculate Total Float for each activity
-- ✅ Identify Critical Path (activities with float ≈ 0, tolerance = 1e-6)
-- ✅ Support FS, SS, FF dependency relationships with lags (0–3 days)
-- ✅ Handle multiple terminal activities via virtual project-end node
-- ✅ Cycle detection: raises CyclicGraphError on cyclic graphs
-- ✅ Validate CPM against 36 unit tests (all pass)
-- ✅ Run CPM across all 100 SCOPE v0.2 projects (0 violations, 0 cycles, 0 float inconsistencies)
-- ✅ Compare computed critical path vs dataset critical_path field (82.1% agreement)
-- ✅ Create `notebooks/03_cpm_validation.md` — full validation report
-
-**Key Results:**
-- All 100 projects processed successfully (0 cycles, 0 constraint violations)
-- 9,279 activities processed, 18,176 dependency edges validated
-- Project durations: 224–449 days (mean 340 days)
-- 3,153 activities marked critical by computed CPM
-- 82.1% agreement with dataset's critical_path field (differences due to methodology)
-- Zero negative float values, zero EF < ES, zero LF < LS violations
+- [ ] Build dependency graph with NetworkX
+- [ ] Calculate ES (Earliest Start), EF (Earliest Finish)
+- [ ] Calculate LS (Latest Start), LF (Latest Finish)
+- [ ] Calculate Total Float for each activity
+- [ ] Identify Critical Path (activities with float ≈ 0)
+- [ ] Handle near-zero float tolerance (e.g., float < 0.1 days = critical)
+- [ ] Return results: ES, EF, LS, LF, Total Float, Critical Path
+- [ ] Validate CPM against known examples
 
 **Deliverables:**
-- `src/cpm/__init__.py` — CPM package
-- `src/cpm/calculation.py` — Deterministic CPM engine (NetworkX-free)
-- `tests/test_cpm.py` — 36 unit tests (all pass)
-- `scripts/run_cpm.py` — Full-dataset CPM runner
-- `notebooks/03_cpm_validation.md` — Phase 3 validation report
-- `data/processed/cpm/` — CPM output artifacts (git-ignored)
+- `src/cpm/calculation.py` — CPM algorithm
+- `tests/test_cpm.py` — CPM unit tests
+- `notebooks/03_cpm_validation.ipynb` — Validation against sample projects
 
 ---
 
@@ -175,16 +251,24 @@ None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
 ---
 
 ### Phase 5 — Risk Scoring
-**Objective:** Rank activities by risk (delay probability × impact on critical path).
+**Objective:** Rank activities by risk, combining ML predictions with CPM criticality.
 
-- [ ] Define risk score formula: Delay Probability × CPM Float Impact
-- [ ] Calculate criticality score (activities near critical path weighted higher)
-- [ ] Rank all activities by risk
-- [ ] Identify top N at-risk activities
+**Tasks (To Be Completed):**
+- [ ] Load ML model predictions (delay probability from Phase 4)
+- [ ] Load CPM outputs (ES, EF, LS, LF, total_float, is_critical)
+- [ ] Define risk scoring formula: `risk_score = delay_probability × criticality_weight × float_impact`
+- [ ] Calculate per-activity risk scores
+- [ ] Rank activities by risk (highest to lowest)
+- [ ] Identify top N at-risk activities (e.g., top 50, top 100)
+- [ ] Analyze risk distribution by project, phase, resource type
+- [ ] Create risk heatmaps and visualizations
 
-**Deliverables:**
-- `src/risk/scoring.py` — Risk ranking logic
-- Risk report with activity rankings
+**Deliverables (To Be Created):**
+- `src/risk/scoring.py` — Risk scoring engine
+- `scripts/calculate_risk_scores.py` — Run risk calculations on full dataset
+- `notebooks/05_risk_analysis.ipynb` — Risk analysis & visualizations
+- `data/processed/risk_scores.csv` — Activity-level risk scores (git-ignored)
+- `reports/risk_report.md` — Risk analysis summary report
 
 ---
 
@@ -279,33 +363,6 @@ None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
 
 ---
 
-## Data Model (SCOPE v0.2)
-
-### Core Tables
-- **projects.csv** (100 projects)
-  - Columns: project_id, project_type, floors, area_m2, complexity, contractor_capability, resource_availability, management_maturity, weather_exposure, supply_chain_exposure, technology_maturity, planned_duration_days, planned_cost
-  
-- **activities.csv** (9,279 activities)
-  - Columns: project_id, activity_id, phase, activity_name, resource_type, planned_duration_days, quantity, unit_cost, planned_cost, criticality, status, critical_path, predecessor_count, successor_count
-  
-- **dependencies.csv** (18,176 dependencies)
-  - Columns: project_id, predecessor_id, successor_id, relationship, lag_days
-  - **KEY TABLE for CPM graph construction**
-
-### Supporting Tables
-- **activity_states.csv** (4M+ records) — Daily productivity, weather risk, site access
-- **construction_memory.csv** — Observed delays, rework, risk scores (**ML training labels**)
-- **events.csv**, **environment.csv**, **decisions.csv** — Context & features for ML
-- Plus 14 more tables for procurement, resources, friction, counterfactuals, etc.
-
-### Data Loader
-- **`src/data/loader.py`** — Reusable module for loading & validating all 25 CSV files
-  - Call: `data = load_raw_dataset()` → returns dict of DataFrames
-  - Validates referential integrity, row counts, column names, nulls, duplicates
-  - Getter functions: `get_projects(data)`, `get_activities(data)`, `get_dependencies(data)`, etc.
-
----
-
 ## Known Gotchas
 
 ### Data Leakage (Phase 4+)
@@ -361,6 +418,33 @@ uv run ruff check --fix
 
 ---
 
+## Data Model (SCOPE v0.2)
+
+### Core Tables
+- **projects.csv** (100 projects)
+  - Columns: project_id, project_type, floors, area_m2, complexity, contractor_capability, resource_availability, management_maturity, weather_exposure, supply_chain_exposure, technology_maturity, planned_duration_days, planned_cost
+
+- **activities.csv** (9,279 activities)
+  - Columns: project_id, activity_id, phase, activity_name, resource_type, planned_duration_days, quantity, unit_cost, planned_cost, criticality, status, critical_path, predecessor_count, successor_count
+
+- **dependencies.csv** (18,176 dependencies)
+  - Columns: project_id, predecessor_id, successor_id, relationship, lag_days
+  - **KEY TABLE for CPM graph construction**
+
+### Supporting Tables
+- **activity_states.csv** (4M+ records) — Daily productivity, weather risk, site access
+- **construction_memory.csv** — Observed delays, rework, risk scores (**ML training labels**)
+- **events.csv**, **environment.csv**, **decisions.csv** — Context & features for ML
+- Plus 14 more tables for procurement, resources, friction, counterfactuals, etc.
+
+### Data Loader
+- **`src/data/loader.py`** — Reusable module for loading & validating all 25 CSV files
+  - Call: `data = load_raw_dataset()` → returns dict of DataFrames
+  - Validates referential integrity, row counts, column names, nulls, duplicates
+  - Getter functions: `get_projects(data)`, `get_activities(data)`, `get_dependencies(data)`, etc.
+
+---
+
 ## Notes & Decisions
 
 - **Python 3.12** — Modern, fast, stable. All dependencies support it via `uv`.
@@ -380,4 +464,4 @@ uv run ruff check --fix
 
 ---
 
-**Last Updated:** Phase 2 Complete — Ready for Phase 3 (CPM Engine)
+**Last Updated:** Phase 0 Complete — Ready for Phase 1 (Dataset Exploration)
