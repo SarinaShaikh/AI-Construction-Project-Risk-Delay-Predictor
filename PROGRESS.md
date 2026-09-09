@@ -121,22 +121,38 @@ None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
 
 ## Upcoming Phases
 
-### Phase 3 — CPM Engine
-**Objective:** Implement Critical Path Method calculations (not started).
+### Phase 3 — CPM Engine ✅ COMPLETE
+**Objective:** Implement Critical Path Method calculations.
 
-- [ ] Build dependency graph with NetworkX
-- [ ] Calculate ES (Earliest Start), EF (Earliest Finish)
-- [ ] Calculate LS (Latest Start), LF (Latest Finish)
-- [ ] Calculate Total Float for each activity
-- [ ] Identify Critical Path (activities with float ≈ 0)
-- [ ] Handle near-zero float tolerance (e.g., float < 0.1 days = critical)
-- [ ] Return results: ES, EF, LS, LF, Total Float, Critical Path
-- [ ] Validate CPM against known examples
+**Completed:**
+- ✅ Build deterministic dependency graph (NetworkX-free, Kahn's algorithm)
+- ✅ Calculate ES (Earliest Start), EF (Earliest Finish)
+- ✅ Calculate LS (Latest Start), LF (Latest Finish)
+- ✅ Calculate Total Float for each activity
+- ✅ Identify Critical Path (activities with float ≈ 0, tolerance = 1e-6)
+- ✅ Support FS, SS, FF dependency relationships with lags (0–3 days)
+- ✅ Handle multiple terminal activities via virtual project-end node
+- ✅ Cycle detection: raises CyclicGraphError on cyclic graphs
+- ✅ Validate CPM against 36 unit tests (all pass)
+- ✅ Run CPM across all 100 SCOPE v0.2 projects (0 violations, 0 cycles, 0 float inconsistencies)
+- ✅ Compare computed critical path vs dataset critical_path field (82.1% agreement)
+- ✅ Create `notebooks/03_cpm_validation.md` — full validation report
+
+**Key Results:**
+- All 100 projects processed successfully (0 cycles, 0 constraint violations)
+- 9,279 activities processed, 18,176 dependency edges validated
+- Project durations: 224–449 days (mean 340 days)
+- 3,153 activities marked critical by computed CPM
+- 82.1% agreement with dataset's critical_path field (differences due to methodology)
+- Zero negative float values, zero EF < ES, zero LF < LS violations
 
 **Deliverables:**
-- `src/cpm/calculation.py` — CPM algorithm
-- `tests/test_cpm.py` — CPM unit tests
-- `notebooks/03_cpm_validation.ipynb` — Validation against sample projects
+- `src/cpm/__init__.py` — CPM package
+- `src/cpm/calculation.py` — Deterministic CPM engine (NetworkX-free)
+- `tests/test_cpm.py` — 36 unit tests (all pass)
+- `scripts/run_cpm.py` — Full-dataset CPM runner
+- `notebooks/03_cpm_validation.md` — Phase 3 validation report
+- `data/processed/cpm/` — CPM output artifacts (git-ignored)
 
 ---
 
