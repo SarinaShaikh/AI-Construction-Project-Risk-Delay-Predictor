@@ -220,16 +220,16 @@ class WhatIfSimulator:
                 break
 
         if scenario_target_row is None:
-            # This should never happen because the activity was already
-            # validated above.
             raise RuntimeError(
                 f"Could not find activity {activity_id!r} "
                 "in the scenario copy."
             )
 
-        original_duration = scenario_target_row[
-            "planned_duration_days"
-        ]
+        # CSV values are strings, so convert the duration to float
+        # before adding the scenario delay.
+        original_duration = float(
+            scenario_target_row["planned_duration_days"]
+        )
 
         scenario_target_row["planned_duration_days"] = (
             original_duration + delay_days
