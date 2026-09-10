@@ -38,7 +38,7 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_RAW_DIR = REPO_ROOT / "data" / "raw" / "SCOPE_v02_Public"
+DEFAULT_RAW_DIR = REPO_ROOT / "data" / "raw"
 DEFAULT_PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 
 # ---------------------------------------------------------------------------
