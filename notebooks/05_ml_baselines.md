@@ -126,7 +126,7 @@ Stage 2 — regress positive delay amount:
 - Random Forest Regressor
 - Gradient Boosting Regressor
 
-The hurdle model is not yet evaluated in this step.
+The hurdle model is evaluated in Phase 4 Step 4 (`notebooks/05_model_evaluation.md`); best validation hurdle combination selected there.
 
 ---
 

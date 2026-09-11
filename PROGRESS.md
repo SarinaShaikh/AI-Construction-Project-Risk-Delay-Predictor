@@ -157,34 +157,46 @@ None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
 ---
 
 ### Phase 4 — ML Delay Prediction
-**Objective:** Train models to predict activity-level delay probability & duration.
+**Objective:** Predict activity-level event-induced/disruption delay days from prediction-time-available features only.
 
-- [ ] Feature engineering (resource availability, procurement time, activity conditions, weather)
-- [ ] Handle data leakage (project-level train/val/test split)
-- [ ] Train baseline models: Logistic Regression, Random Forest, Gradient Boosting
-- [ ] Evaluate metrics: Accuracy, Precision, Recall, F1, ROC-AUC, Calibration
-- [ ] Hyperparameter tuning
-- [ ] Select best model based on ROC-AUC & calibration
-- [ ] Serialize model (pickle/joblib)
+**Completed:**
+- ✅ Phase 4 Step 1 — Prediction problem design & feature audit (`notebooks/04_ml_problem_design.md`)
+- ✅ Phase 4 Step 2 — Leakage-safe deterministic feature engineering (`src/ml/feature_engineering.py`, `notebooks/04_feature_engineering.md`, 55 features, project-level split)
+- ✅ Phase 4 Step 3 — Train-only preprocessing + regression/classification/hurdle baseline preparation (`src/ml/modeling.py`, `notebooks/05_ml_baselines.md`, leakage + preprocessing tests)
+- ✅ Phase 4 Step 4 — Baseline evaluation, calibration analysis, and model selection on validation only (`notebooks/05_model_evaluation.md`; completed — validation-only evaluation finalized, test set not used for selection)
 
-**Deliverables:**
-- `src/models/delay_classifier.py` — Trained model wrapper
-- `src/features/engineering.py` — Feature transformations
-- `notebooks/04_model_training.ipynb` — Model development & evaluation
+**Completed decisions:**
+- Target = `target_event_delay_days` (event-induced/disruption delay days), not actual schedule slippage.
+- Prediction unit = one activity.
+- Project-level split: 70 train / 15 validation / 15 test (no project overlap).
+- Test set locked until final evaluation.
+- No events/rework/decision-actual/procurement-actual/environment/activity-state/critical_path/critical_path_position features used.
+
+**Deliverables (through Step 3):**
+- `src/ml/feature_engineering.py` — leakage-safe feature matrix builder
+- `src/ml/modeling.py` — preprocessing, baselines, evaluation helpers, hurdle pipeline
+- `tests/test_feature_engineering.py` — feature leakage/correctness tests
+- `tests/test_modeling.py` — preprocessing + baseline leakage tests
+- `notebooks/04_ml_problem_design.md`, `notebooks/04_feature_engineering.md`, `notebooks/05_ml_baselines.md`
+
+**Step 4 status:**
+- Step 4 implementation exists (`src/ml/evaluation.py`, `scripts/run_phase4_evaluation.py`) with focused tests (`tests/test_evaluation.py`) passing.
+- Validation-only evaluation completed; selected models are finalized and documented in `notebooks/05_model_evaluation.md`.
+- Test set remains locked; Phase 5 has NOT started.
+
+**Next:** Phase 5 risk scoring is not started and must not be combined with ML yet.
 
 ---
 
 ### Phase 5 — Risk Scoring
-**Objective:** Rank activities by risk (delay probability × impact on critical path).
+**Objective:** Rank activities by risk (event-induced delay probability × CPM float/criticality impact).
 
-- [ ] Define risk score formula: Delay Probability × CPM Float Impact
-- [ ] Calculate criticality score (activities near critical path weighted higher)
-- [ ] Rank all activities by risk
-- [ ] Identify top N at-risk activities
+- [ ] Not started. This phase must combine Phase 4 ML outputs with Phase 3 CPM outputs.
+- [ ] Phase 4 must be complete and validated before Phase 5 begins.
+- [ ] Any risk score must be documented, deterministic where possible, and not invented by an LLM.
 
 **Deliverables:**
-- `src/risk/scoring.py` — Risk ranking logic
-- Risk report with activity rankings
+- Not started
 
 ---
 
