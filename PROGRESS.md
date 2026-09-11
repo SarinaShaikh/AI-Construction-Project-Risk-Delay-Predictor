@@ -222,16 +222,53 @@ None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
 
 ---
 
-### Phase 7 — Mitigation Recommendations
-**Objective:** Generate context-aware mitigation actions.
+### Phase 7 — Deterministic Risk Analysis & Reporting (Integrated)
+**Objective:** Convert Phase 5 activity-level risk scores into structured, deterministic, human-readable construction risk insights, project-level summaries, and reports.
 
-- [ ] Define mitigation strategies (fast-track, crash, resource reallocation, etc.)
-- [ ] Match strategies to project data & ML predictions
-- [ ] Rank recommendations by impact & feasibility
-- [ ] Generate manager-friendly explanations
+**Architecture (integrated on branch `phase7-integration`, from friend's commit `747f13e`):**
+
+```
+Phase 5 output (data/processed/risk_scores.csv, owned by scripts/run_phase5_risk.py)
+        ↓  src/llm/risk_adapter.py  (presentation renames only; risk_score carried through UNCHANGED)
+Phase 7 input schema
+        ↓  ConstructionRiskAnalyzer   (src/llm/analyzer.py)   → activity_risk_insights.csv
+        ↓  ProjectRiskSummarizer      (src/llm/project_summary.py) → project_risk_summaries.csv
+        ↓  ConstructionRiskReportGenerator (src/llm/report_generator.py) → reports/project_risk_reports.json
+```
+
+- [x] Activity-level deterministic explanations and recommendations (ConstructionRiskAnalyzer)
+- [x] Project-level aggregation (ProjectRiskSummarizer)
+- [x] Structured per-project reports (ConstructionRiskReportGenerator)
+
+**Guarantees (validated by tests/test_risk_adapter.py and scripts/validate_risk_analysis.py):**
+- Phase 7 consumes Phase 5 deterministic risk scores; it does NOT independently calculate ML predictions or CPM.
+- Phase 7 does NOT recalculate or alter the Phase 5 risk score (exact numerical identity is asserted, max |diff| = 0.0).
+- Phase 7 does NOT use an external LLM/API — the `src/llm` package name is historical (upstream naming); everything in Phase 7 is deterministic.
+- Phase 7 generates deterministic activity risk insights, project-level summaries, structured reports, and mitigation recommendations.
+- risk_level is a deterministic classification of the SAME Phase 5 score (High >= 0.70, Medium >= 0.40, Low otherwise) — traceable thresholds, not a second scoring system.
+
+**Important distinction:**
+- Risk score ≠ actual schedule slippage. The Phase 4/5 target is event-induced/disruption delay (`target_event_delay_days`), NOT actual project schedule delay. Phase 7 reports interpret event-disruption risk, not realized schedule slippage.
+
+**Outputs:**
+- `data/processed/risk/activity_risk_scores.csv` (adapter output of the Phase 5 file)
+- `data/processed/risk/activity_risk_insights.csv`
+- `data/processed/risk/project_risk_summaries.csv`
+- `reports/project_risk_reports.json`
+
+**Run:**
+```powershell
+uv run python scripts/run_risk_analysis.py
+uv run python scripts/validate_risk_analysis.py
+```
 
 **Deliverables:**
-- `src/recommendations/engine.py` — Recommendation logic
+- `src/llm/analyzer.py` — ConstructionRiskAnalyzer (deterministic insights)
+- `src/llm/project_summary.py` — ProjectRiskSummarizer (deterministic aggregation)
+- `src/llm/report_generator.py` — ConstructionRiskReportGenerator (deterministic reports)
+- `src/llm/risk_adapter.py` — Phase 5 → Phase 7 integration adapter
+- `scripts/run_risk_analysis.py` — End-to-end Phase 7 runner
+- `scripts/validate_risk_analysis.py` — Validation incl. Phase 5 numerical-consistency checks
 - Manager-facing recommendation report
 
 ---

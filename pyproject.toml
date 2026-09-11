@@ -26,3 +26,10 @@ dev = [
     "ruff>=0.16.6",
     "pytest>=8.0",
 ]
+
+[tool.pytest.ini_options]
+# Phase 7 integration: lets tests import src.* packages directly
+# (e.g. from src.llm.analyzer import ...) alongside the existing
+# top-level style (from risk.scoring import ...) used by Phase 1-6 tests.
+pythonpath = ["."]
+testpaths = ["tests"]

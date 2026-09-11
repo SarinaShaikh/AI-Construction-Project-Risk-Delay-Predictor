@@ -70,3 +70,6 @@ outputs/
 results/
 # Unrelated temporary file
 1NPDPRO5.DOC
+
+# Phase 7 generated report (deterministic; regenerate with scripts/run_risk_analysis.py)
+reports/project_risk_reports.json

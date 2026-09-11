@@ -16,7 +16,11 @@ heuristics, NOT learned/statistical facts.
 The production risk engine does NOT depend on validation-set predictions specifically.
 """
 
-from risk.scoring import (
+# Package-relative import (branch phase7-integration import fix).
+# The previous top-level 'from risk.scoring import ...' failed whenever the
+# 'risk' package was imported as src.risk (ModuleNotFoundError: No module
+# named 'risk'). Relative imports work for both src.risk and risk styles.
+from .scoring import (
     RiskScoreCalculator,
     calculate_risk_scores,
     criticality_weight,

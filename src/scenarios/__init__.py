@@ -3,7 +3,10 @@
 Re-exports the public API from scenarios.simulator.
 """
 
-from scenarios.simulator import (
+# Package-relative import (branch phase7-integration import fix, same class
+# of bug as src/risk/__init__.py: top-level 'from scenarios.simulator ...'
+# breaks when imported as src.scenarios).
+from .simulator import (
     ScenarioResult,
     WhatIfSimulator,
     load_scope_rows,
