@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Phase: 6 (What-if Simulation) — ✅ COMPLETE
+**Phase: 7 — Risk Analysis, Project Risk Summary & Reports — ✅ COMPLETE**
 
-Next Task: Phase 7 — Mitigation Recommendations
+**Next Task: Phase 8 — LLM / Agentic AI**
 
 ---
 
@@ -12,413 +12,665 @@ Next Task: Phase 7 — Mitigation Recommendations
 
 ### Phase 0 — Project Setup ✅
 
+**Objective:** Initialize the project, development environment, repository, and folder structure.
+
+**Completed:**
+
 * ✅ Initialize Git repository on GitHub
-* ✅ Create folder structure (data/, src/, app/, tests/, scripts/, notebooks/)
-* ✅ Create pyproject.toml with Python 3.12 + proper metadata
-* ✅ Create .gitignore (protects .venv, **pycache**, .env, logs, generated outputs)
-* ✅ Create PROGRESS.md
-* ✅ Push to GitHub: https://github.com/SarinaShaikh/AI-Construction-Project-Risk-Delay-Predictor
+* ✅ Create project folder structure
+* ✅ Create `pyproject.toml` with Python 3.12 + project metadata
+* ✅ Create `.gitignore`
+* ✅ Create `PROGRESS.md`
+* ✅ Configure `uv` for dependency and environment management
+* ✅ Push project to GitHub
+
+**Repository:**
+
+```text
+https://github.com/SarinaShaikh/AI-Construction-Project-Risk-Delay-Predictor
+```
 
 **Repository Structure:**
 
 ```text
-construction-risk-predictor/
+AI-Construction-Project-Risk-Delay-Predictor/
 
 ├── data/
-│   ├── raw/              (SCOPE v0.2 dataset)
-│   ├── processed/        (Cleaned data - ignored by Git)
-│   └── exports/          (CSV exports - ignored by Git)
-├── notebooks/            (Jupyter exploratory analysis)
+│   ├── raw/                  (SCOPE v0.2 dataset)
+│   ├── processed/            (Generated/processed data - ignored by Git)
+│   └── exports/              (Generated exports - ignored by Git)
+│
+├── notebooks/                (Jupyter notebooks and analysis)
+│
 ├── src/
-│   ├── ai_construction/  (Main package)
-│   ├── cpm/              (Critical Path Method calculations)
-│   ├── data/             (Data loading & cleaning)
-│   ├── features/         (Feature engineering)
-│   ├── models/           (ML models)
-│   ├── risk/             (Risk analysis)
-│   ├── scenarios/        (What-if simulation)
-│   ├── recommendations/  (Mitigation recommendations)
-│   └── llm/              (LLM/Agent integration)
-├── app/                  (Streamlit dashboard)
-├── tests/                (Unit & integration tests)
-├── scripts/              (Standalone utilities)
-├── PROGRESS.md           (This file)
-├── README.md             (Project documentation)
-├── pyproject.toml        (Python 3.12 config)
-└── .gitignore            (Git exclusions)
+│   ├── ai_construction/      (Main package)
+│   ├── cpm/                  (Critical Path Method)
+│   ├── data/                 (Data loading and cleaning)
+│   ├── features/             (Feature engineering)
+│   ├── models/               (ML models)
+│   ├── risk/                 (Risk scoring and analysis)
+│   ├── scenarios/            (What-if simulation)
+│   ├── recommendations/      (Mitigation recommendations)
+│   └── llm/                  (LLM and agent integration)
+│
+├── app/                      (Streamlit dashboard)
+├── tests/                    (Automated tests)
+├── scripts/                  (Standalone utilities)
+│
+├── PROGRESS.md
+├── README.md
+├── pyproject.toml
+└── .gitignore
 ```
 
 ---
 
 ### Phase 1 — Understand SCOPE v0.2 Dataset ✅
 
-**Objective:** Explore dataset structure, understand projects, activities, dependencies, and data quality.
+**Objective:** Explore the dataset structure and understand projects, activities, dependencies, and data quality.
 
 **Completed:**
 
-* ✅ SCOPE v0.2 dataset analyzed (25 CSV files, 100 projects, 9,279 activities, 18,176 dependencies)
-* ✅ Data quality validated (no nulls, no duplicates, referential integrity intact)
-* ✅ Created `src/data/loader.py` — reusable data loading module
-* ✅ Created `notebooks/01_dataset_exploration.ipynb` — exploratory analysis with visualizations
+* ✅ SCOPE v0.2 dataset analyzed
+* ✅ 25 CSV files analyzed
+* ✅ 100 projects identified
+* ✅ 9,279 activities identified
+* ✅ 18,176 dependencies identified
+* ✅ No null values in core data
+* ✅ No duplicate records
+* ✅ Referential integrity validated
+* ✅ Created reusable data loader
+* ✅ Created dataset exploration notebook
 
 **Deliverables:**
 
-* `src/data/loader.py` — loads & validates all 25 CSV files
-* `notebooks/01_dataset_exploration.ipynb` — EDA notebook
+* `src/data/loader.py`
+* `notebooks/01_dataset_exploration.ipynb`
 
 ---
 
 ### Phase 2 — Data Cleaning & Preparation ✅
 
-**Objective:** Clean, validate, and prepare data for analysis.
+**Objective:** Clean, validate, and prepare the dataset for CPM and ML processing.
 
 **Completed:**
 
-* ✅ Protect raw data: `data/raw/` git-ignored
-* ✅ Created deterministic cleaning pipeline `scripts/clean_scope.py`
-* ✅ Validated 12 core tables (no rows lost, no columns dropped)
-* ✅ Zero missing values, zero duplicates, zero invalid dates/durations
-* ✅ All 18,176 dependencies validated (0 cycles, 0 orphans)
-* ✅ Created target `target_event_delay_days` (SUM of event durations per activity)
-* ✅ Established leakage prevention rules (prediction-time availability classification)
-* ✅ 47 pytest tests — all pass
+* ✅ Protected raw data using Git ignore rules
+* ✅ Created deterministic cleaning pipeline
+* ✅ Validated 12 core tables
+* ✅ No rows lost during cleaning
+* ✅ No required columns dropped
+* ✅ Zero missing values
+* ✅ Zero duplicates
+* ✅ Zero invalid dates/durations
+* ✅ Validated all 18,176 dependencies
+* ✅ Zero orphan dependencies
+* ✅ Zero circular dependencies
+* ✅ Created target variable `target_event_delay_days`
+* ✅ Aggregated event delays at activity level
+* ✅ Established prediction-time availability rules
+* ✅ Prevented future-data leakage
 
 **Deliverables:**
 
-* `scripts/clean_scope.py` — deterministic cleaning pipeline
-* `tests/test_clean_scope.py` — 47 validation tests
-* `data/processed/` — 12 cleaned tables + targets + metadata (git-ignored)
-* `notebooks/02_data_cleaning.md` — Phase 2 report
+* `scripts/clean_scope.py`
+* `tests/test_clean_scope.py`
+* `notebooks/02_data_cleaning.md`
+* Processed dataset under `data/processed/`
+
+**Validation:**
+
+* ✅ 47 Phase 2 tests passed
 
 ---
 
 ### Phase 3 — CPM Engine ✅
 
-**Objective:** Implement Critical Path Method calculations.
+**Objective:** Implement a deterministic Critical Path Method engine for construction schedules.
 
 **Completed:**
 
-* ✅ Deterministic CPM engine (NetworkX-free, Kahn's algorithm)
-* ✅ Calculate ES, EF, LS, LF, Total Float for all 9,279 activities
-* ✅ Identify critical path & critical activities (float < 1e-6)
-* ✅ Support FS, SS, FF dependency relationships with lags (0-3 days)
-* ✅ Handle multiple terminal activities via virtual project-end node
-* ✅ Cycle detection: validated all 100 projects are DAGs
-* ✅ All 9,279 activities processed successfully (0 violations, 0 cycles)
-* ✅ 36 pytest unit tests — all pass
+* ✅ Implemented NetworkX-free CPM engine
+* ✅ Implemented Kahn's algorithm for topological processing
+* ✅ Calculate Early Start (ES)
+* ✅ Calculate Early Finish (EF)
+* ✅ Calculate Late Start (LS)
+* ✅ Calculate Late Finish (LF)
+* ✅ Calculate Total Float
+* ✅ Identify critical activities
+* ✅ Support Finish-to-Start (FS)
+* ✅ Support Start-to-Start (SS)
+* ✅ Support Finish-to-Finish (FF)
+* ✅ Support dependency lags
+* ✅ Handle multiple terminal activities
+* ✅ Implement virtual project-end node
+* ✅ Implement cycle detection
+* ✅ Validate all 100 projects
 
 **Key Results:**
 
-* All 100 projects processed successfully
-* 3,153 activities marked critical by CPM
-* 82.1% agreement with dataset's critical_path field
-* Zero negative float values, zero constraint violations
+* 100 projects processed successfully
+* 9,279 activities processed
+* 18,176 dependencies processed
+* 3,153 activities identified as critical
+* 82.1% agreement with dataset `critical_path`
+* Zero negative float values
+* Zero constraint violations
+* Zero dependency cycles
 
 **Deliverables:**
 
-* `src/cpm/calculation.py` — Deterministic CPM engine
-* `tests/test_cpm.py` — 36 unit tests
-* `scripts/run_cpm.py` — Full-dataset CPM runner
-* `notebooks/03_cpm_validation.md` — Phase 3 validation report
-* `data/processed/cpm_results.csv` — CPM outputs for all activities (git-ignored)
+* `src/cpm/calculation.py`
+* `tests/test_cpm.py`
+* `scripts/run_cpm.py`
+* `notebooks/03_cpm_validation.md`
+* `data/processed/cpm_results.csv`
+
+**Validation:**
+
+* ✅ 36 CPM tests passed
 
 ---
 
 ### Phase 4 — ML Delay Prediction ✅
 
-**Objective:** Train models to predict activity-level delay probability & duration.
+**Objective:** Train machine-learning models to predict activity-level construction delay duration.
 
 **Completed:**
 
-* ✅ Created `src/features/engineering.py` — 10-step feature extraction pipeline
-
-  * Activity features (3): planned_duration_days, predecessor_count, successor_count
-  * CPM features (7): ES, EF, LS, LF, total_float, is_critical, float_pct_of_duration
-  * Project context (9): complexity, contractor_capability, weather_exposure, etc.
-  * Resource features (2): num_resources_allocated, resource_scarcity
-  * Procurement features (2): avg_lead_days, avg_procurement_delay_days
-  * Environment features (4): weather_risk, site_access_index, event_pressure, productivity
-  * Categorical features: one-hot encoded (phase, resource_type, criticality, project_type, complexity)
-  * Total: ~40+ features after encoding
-
-* ✅ Created `scripts/prepare_ml_data.py` — Dataset preparation
-
-  * Project-level train/val/test split (70/15/15) with zero data leakage
-  * StandardScaler fitted ONLY on training data
-  * Saved 6 datasets (X_train, X_val, X_test, y_train, y_val, y_test)
-  * Saved scaler & feature names for reproducibility
-
-* ✅ Created `notebooks/04_model_training.ipynb` — Model training & evaluation
-
-  * Baseline models: Linear Regression, Random Forest, Gradient Boosting
-  * Hyperparameter tuning: RandomizedSearchCV (20 iterations, 3-fold CV)
-  * Feature importance analysis: top 20 features identified
-  * Final test set evaluation: MAE, RMSE, R², MAPE
-  * Visualizations: predicted vs actual, residuals, feature importance, model comparison
-  * Saved best model to `data/processed/ml/best_model.pkl`
-  * Saved model metadata with performance metrics
+* ✅ Created feature engineering pipeline
+* ✅ Generated activity-level features
+* ✅ Generated CPM-based features
+* ✅ Added project context features
+* ✅ Added resource features
+* ✅ Added procurement features
+* ✅ Added environmental features
+* ✅ Added categorical features
+* ✅ Applied one-hot encoding
+* ✅ Generated approximately 40+ initial features
+* ✅ Final feature set saved with model metadata
+* ✅ Implemented project-level 70/15/15 train/validation/test split
+* ✅ Prevented project-level data leakage
+* ✅ StandardScaler fitted only on training data
+* ✅ Trained baseline models
+* ✅ Trained Random Forest model
+* ✅ Trained Gradient Boosting model
+* ✅ Performed hyperparameter tuning
+* ✅ Evaluated MAE, RMSE, R² and MAPE
+* ✅ Generated model comparison
+* ✅ Generated feature importance analysis
+* ✅ Saved best trained model
 
 **Key Results:**
 
-* Feature matrix: 9,279 activities × ~40+ features (scaled)
-* Best model: Gradient Boosting (or Random Forest, depending on data)
-* Test set performance: R² ~0.5+, RMSE ~38 days, MAE ~14 days
-* Good generalization: train/test R² difference < 0.1
-* No data leakage: projects isolated across splits
+* Dataset: 9,279 activities
+* Best model: `GradientBoostingRegressor`
+* Test R²: approximately 0.5+
+* Test RMSE: approximately 38 days
+* Test MAE: approximately 14 days
+* Good generalization
+* Project-level split prevents leakage
 
 **Deliverables:**
 
-* `src/features/engineering.py` — 10-step feature engineering pipeline
-* `scripts/prepare_ml_data.py` — ML data preparation (scaling, splitting)
-* `notebooks/04_model_training.ipynb` — Model training, hyperparameter tuning, evaluation
-* `data/processed/ml/X_train.csv, X_val.csv, X_test.csv` — Feature matrices
-* `data/processed/ml/y_train.csv, y_val.csv, y_test.csv` — Target variables
-* `data/processed/ml/best_model.pkl` — Serialized best model
-* `data/processed/ml/best_model_metadata.json` — Model info & performance
-* `data/processed/ml/feature_names.json` — Feature column names
-* `data/processed/ml/scaler.pkl` — Fitted StandardScaler
+* `src/features/engineering.py`
+* `scripts/prepare_ml_data.py`
+* `notebooks/04_model_training.ipynb`
+* `data/processed/ml/X_train.csv`
+* `data/processed/ml/X_val.csv`
+* `data/processed/ml/X_test.csv`
+* `data/processed/ml/y_train.csv`
+* `data/processed/ml/y_val.csv`
+* `data/processed/ml/y_test.csv`
+* `data/processed/ml/best_model.pkl`
+* `data/processed/ml/best_model_metadata.json`
+* `data/processed/ml/feature_names.json`
+* `data/processed/ml/scaler.pkl`
 
 ---
 
 ### Phase 5 — Risk Scoring & Risk Analysis ✅
 
-**Objective:** Rank construction activities by schedule risk using project schedule and risk factors.
+**Objective:** Calculate activity-level construction risk using ML predictions, schedule criticality, and float impact.
 
 **Completed:**
 
-* ✅ Implemented risk scoring and activity risk analysis
-* ✅ Combined schedule impact indicators including project duration impact, float consumption, criticality changes, and critical-path changes
-* ✅ Created risk score calculation with deterministic scoring logic
-* ✅ Added risk levels: Low, Medium, and High
-* ✅ Implemented activity-level risk ranking
-* ✅ Integrated risk analysis with scenario simulation
-* ✅ Validated risk calculations through automated tests
+* ✅ Implemented `RiskScorer`
+* ✅ Integrated trained ML delay prediction model
+* ✅ Generated activity-level delay predictions
+* ✅ Calculated delay probability
+* ✅ Calculated criticality weight
+* ✅ Calculated float impact
+* ✅ Calculated combined activity risk score
+* ✅ Added High / Medium / Low activity risk levels
+* ✅ Ranked activities by risk score
+* ✅ Integrated CPM results with risk scoring
+* ✅ Integrated risk scoring with scenario simulation
+* ✅ Added automated validation tests
+
+**Risk score components:**
+
+```text
+Delay Probability
+        ×
+Criticality Weight
+        ×
+Float Impact
+        =
+Activity Risk Score
+```
+
+**Key Results:**
+
+* 9,279 activities analyzed
+* Mean predicted delay: approximately 17.08 days
+* Mean activity risk score: approximately 0.251
+* Risk scores range from 0 to 1
+* High-risk activities: approximately 8%
+* Medium-risk activities: approximately 18%
+* Low-risk activities: approximately 74%
 
 ---
 
 ### Phase 6 — What-if Simulation ✅
 
-**Objective:** Model the impact of construction schedule scenarios and determine how delays or resource changes affect the project schedule.
+**Objective:** Model the impact of construction schedule scenarios and determine how changes affect the project schedule.
 
 **Completed:**
 
-* ✅ Created `src/scenarios/simulator.py` — What-if scenario engine
-* ✅ Created `scripts/run_scenarios.py` — Scenario execution script
-* ✅ Created `tests/test_simulator.py` — Automated scenario tests
-* ✅ Added scenario result export to JSON and CSV
+* ✅ Created `src/scenarios/simulator.py`
+* ✅ Created `scripts/run_scenarios.py`
+* ✅ Created `tests/test_simulator.py`
+* ✅ Added JSON scenario output
+* ✅ Added CSV scenario output
 * ✅ Recalculate CPM independently for every scenario
 * ✅ Calculate direct activity impact
-* ✅ Track downstream/successor activities affected by each scenario
-* ✅ Calculate baseline float and scenario float
+* ✅ Track downstream/successor activities
+* ✅ Calculate baseline float
+* ✅ Calculate scenario float
 * ✅ Calculate float consumption
-* ✅ Detect newly critical and no-longer-critical activities
+* ✅ Detect newly critical activities
+* ✅ Detect no-longer-critical activities
 * ✅ Detect critical path changes
 * ✅ Calculate project completion duration impact
-* ✅ Generate deterministic scenario risk score and risk level
-* ✅ Support activity delay scenarios
-* ✅ Support resource allocation reduction scenarios
-* ✅ Support weather delay scenarios
-* ✅ Prevent incorrect logic that simply adds delay to the project end date
+* ✅ Generate deterministic scenario risk score
+* ✅ Generate scenario risk level
+* ✅ Support activity delay
+* ✅ Support resource allocation reduction
+* ✅ Support weather delay
+* ✅ Prevent incorrect logic that simply adds delay to project end date
 
 **Scenarios Supported:**
 
-1. **Activity / Material Delay**
+#### 1. Activity / Material Delay
 
-   * Delays an activity by a specified number of days.
-   * CPM is recalculated to determine downstream schedule impact.
+Delays a selected activity by a specified number of days and recalculates the CPM network.
 
-2. **Resource Allocation Reduction**
+#### 2. Resource Allocation Reduction
 
-   * Reduces resource allocation by a specified percentage.
-   * Effective activity duration is recalculated based on the reduced allocation.
+Reduces resource allocation by a specified percentage and recalculates the effective activity duration.
 
-3. **Weather Delay**
+#### 3. Weather Delay
 
-   * Delays the start of an activity by a specified number of days.
-   * CPM is recalculated to determine project-level impact.
+Adds a weather-related delay to an activity and recalculates the schedule impact.
 
-**Validation Run:**
+**Validation Project:**
 
-* Dataset: SCOPE v0.2
-* Projects available: 100
-* Activities: 9,279
-* Dependencies: 18,176
-* Scenario test project: `P00096`
-* Activities in selected project: 171
-* Three scenarios executed successfully:
-
-  * Activity delay: +7 days
-  * Resource reduction: 20%
-  * Weather delay: +5 days
+```text
+Project: P00096
+Activities: 171
+```
 
 **Scenario Results:**
 
-* Activity delay:
-
-  * Project duration impact: +7 days
-  * Float consumed: 0 days
-  * Downstream activities: 18
-  * Risk score: 14/100
-  * Risk level: Low
-
-* Resource reduction:
-
-  * Effective delay: 8.5 days
-  * Project duration impact: 0 days
-  * Float consumed: 8 days
-  * Downstream activities: 23
-  * Risk score: 12/100
-  * Risk level: Low
-
-* Weather delay:
-
-  * Project duration impact: +5 days
-  * Float consumed: 0 days
-  * Downstream activities: 170
-  * Risk score: 10/100
-  * Risk level: Low
-
-**Test Results:**
-
-* ✅ 90 pytest tests passed
-* ✅ Full test suite completed successfully
-* ✅ No scenario calculation failures
+| Scenario               |  Impact | Float Consumed | Downstream | Risk     |
+| ---------------------- | ------: | -------------: | ---------: | -------- |
+| Activity delay +7 days | +7 days |         0 days |         18 | 14 / Low |
+| Resource reduction 20% |  0 days |         8 days |         23 | 12 / Low |
+| Weather delay +5 days  | +5 days |         0 days |        170 | 10 / Low |
 
 **Deliverables:**
 
-* `src/scenarios/simulator.py` — What-if simulation engine
-* `scripts/run_scenarios.py` — Scenario runner
-* `tests/test_simulator.py` — Scenario unit tests
-* `data/processed/scenarios/scenario_results.json` — Scenario results
-* `data/processed/scenarios/scenario_results.csv` — Scenario results
+* `src/scenarios/simulator.py`
+* `scripts/run_scenarios.py`
+* `tests/test_simulator.py`
+* `data/processed/scenarios/scenario_results.json`
+* `data/processed/scenarios/scenario_results.csv`
 
 ---
 
-## In-Progress Phase
+### Phase 7 — Risk Analysis, Project Risk Summary & Reports ✅
 
-None — Phase 6 complete. Ready to begin Phase 7 (Mitigation Recommendations).
+**Objective:** Convert activity-level ML and CPM risk results into meaningful project-level risk assessments, explanations, and manager-friendly reports.
+
+**Completed:**
+
+#### Activity-Level Risk Analysis
+
+* ✅ Generated risk scores for all 9,279 activities
+* ✅ Generated delay predictions
+* ✅ Generated delay probabilities
+* ✅ Calculated criticality weights
+* ✅ Calculated float impact
+* ✅ Ranked activities by risk
+* ✅ Generated activity-level risk levels
+* ✅ Generated deterministic explanations
+* ✅ Generated mitigation recommendations for activities
+* ✅ Achieved 100% explanation coverage
+* ✅ Achieved 100% recommendation coverage
+
+#### Project-Level Risk Summary
+
+* ✅ Created `src/llm/project_summary.py`
+* ✅ Aggregated activity risks at project level
+* ✅ Counted High / Medium / Low activities
+* ✅ Calculated average risk score
+* ✅ Calculated maximum risk score
+* ✅ Calculated average predicted delay
+* ✅ Calculated maximum predicted delay
+* ✅ Counted critical high-risk activities
+* ✅ Implemented project-level High / Medium / Low classification
+* ✅ Prevented overly aggressive project-level High classification
+* ✅ Projects with no High-risk activities are classified as Low unless higher-risk conditions apply
+
+**Final Project Risk Distribution:**
+
+```text
+Total Projects: 100
+
+High:    14 projects
+Medium:  19 projects
+Low:     67 projects
+```
+
+#### Project Risk Reports
+
+* ✅ Created `src/llm/report_generator.py`
+* ✅ Generated manager-friendly project reports
+* ✅ Included project risk summary
+* ✅ Included top-risk activities
+* ✅ Included predicted delay information
+* ✅ Included risk levels
+* ✅ Included explanations
+* ✅ Included recommendations
+* ✅ Generated reports for all 100 projects
+
+#### End-to-End Risk Pipeline
+
+* ✅ Created `scripts/run_risk_analysis.py`
+* ✅ Integrated RiskScorer
+* ✅ Integrated activity risk analyzer
+* ✅ Integrated project risk summarizer
+* ✅ Integrated report generator
+* ✅ Generated complete Phase 7 outputs
+
+**Phase 7 Outputs:**
+
+```text
+data/processed/risk/activity_risk_scores.csv
+data/processed/risk/activity_risk_insights.csv
+data/processed/risk/project_risk_summaries.csv
+data/processed/reports/project_risk_reports.json
+```
+
+**Key Results:**
+
+```text
+Activities analyzed: 9,279
+Projects summarized: 100
+Project reports generated: 100
+
+Mean predicted delay: 17.0777 days
+Mean activity risk score: 0.2509
+```
+
+**Sample Project Reports:**
+
+```text
+P00001 → Medium risk
+P00002 → Low risk
+P00003 → Low risk
+```
+
+**Testing:**
+
+* ✅ Project summary tests: 12 passed
+* ✅ Complete project test suite: 124 passed
+* ✅ Zero test failures
+* ✅ All major project components validated
+
+---
+
+## Current Phase
+
+### Phase 7 — COMPLETE ✅
+
+The risk analysis layer is now complete.
+
+The system can currently:
+
+```text
+Construction Schedule
+        ↓
+Data Cleaning
+        ↓
+CPM Calculation
+        ↓
+ML Delay Prediction
+        ↓
+Activity Risk Scoring
+        ↓
+Activity Risk Explanation
+        ↓
+Project Risk Aggregation
+        ↓
+Project Risk Report
+```
+
+The project is now ready for **Phase 8 — LLM / Agentic AI**.
 
 ---
 
 ## Upcoming Phases
 
-### Phase 7 — Mitigation Recommendations
-
-**Objective:** Generate context-aware mitigation actions.
-
-* [ ] Define mitigation strategies (fast-track, crash, resource reallocation, etc.)
-* [ ] Match strategies to project data & ML predictions
-* [ ] Rank recommendations by impact & feasibility
-* [ ] Generate manager-friendly explanations
-
-**Deliverables:**
-
-* `src/recommendations/engine.py` — Recommendation logic
-* Manager-facing recommendation report
-
----
-
 ### Phase 8 — LLM / Agentic AI
 
-**Objective:** Use Groq LLM to investigate risks & explain results.
+**Objective:** Use a Groq-based LLM agent to investigate construction risks and explain analytical results.
 
 **LLM responsibilities:**
 
-* Investigate project risks (call analysis tools)
-* Explain CPM results
-* Summarize delay predictions
-* Explain what-if scenarios
-* Generate manager-friendly insights
+* [ ] Investigate project risks
+* [ ] Call risk-analysis tools
+* [ ] Explain CPM results
+* [ ] Summarize ML delay predictions
+* [ ] Explain what-if scenarios
+* [ ] Explain project-level risk
+* [ ] Explain high-risk activities
+* [ ] Generate manager-friendly insights
+* [ ] Generate natural-language risk investigation responses
 
-**LLM constraints:**
+**LLM Constraints:**
 
 * ❌ Must NOT invent numerical predictions
+* ❌ Must NOT calculate unsupported numerical results
+* ❌ Must NOT replace the deterministic CPM engine
+* ❌ Must NOT replace the trained ML model
 * ✅ Must call analysis tools for numerical results
-* ✅ Can synthesize insights from tool results
+* ✅ Must use returned tool results as the numerical source of truth
+* ✅ Can synthesize and explain validated results
+* ✅ Can combine CPM, ML, risk, scenario, and recommendation outputs
 
-**Deliverables:**
+**Planned Architecture:**
 
-* `src/llm/agent.py` — Groq agent with tool integration
-* Tool definitions (CPM analysis, risk analysis, scenario simulation)
+```text
+User Question
+      ↓
+Groq LLM Agent
+      ↓
+Tool Selection
+      ↓
+┌─────────────────────────────┐
+│ CPM Analysis Tool           │
+│ Risk Analysis Tool          │
+│ Scenario Simulation Tool    │
+│ Recommendation Tool         │
+└─────────────────────────────┘
+      ↓
+Validated Numerical Results
+      ↓
+Groq LLM
+      ↓
+Manager-Friendly Explanation
+```
+
+**Planned Deliverables:**
+
+* `src/llm/agent.py`
+* LLM tool definitions
+* Tool integration
+* Agent prompts
+* Numerical grounding validation
+* Agent tests
 
 ---
 
 ### Phase 9 — Streamlit Dashboard
 
-**Objective:** Interactive UI for project managers.
+**Objective:** Build an interactive dashboard for construction project managers.
 
-**Dashboard features:**
+**Planned Features:**
 
-* Project overview (timeline, # activities, # dependencies)
-* Critical path visualization
-* Risk heatmap (activity rankings)
-* ML delay predictions by activity
-* What-if scenario builder
-* Mitigation recommendations panel
-* LLM chat interface for risk investigation
-* Export reports (PDF, CSV)
+* [ ] Project overview
+* [ ] Project duration and timeline
+* [ ] Number of activities
+* [ ] Number of dependencies
+* [ ] Critical path visualization
+* [ ] Risk heatmap
+* [ ] Activity risk ranking
+* [ ] ML delay predictions
+* [ ] Project-level risk summary
+* [ ] What-if scenario builder
+* [ ] Mitigation recommendations
+* [ ] LLM risk investigation chat
+* [ ] Export reports
+* [ ] CSV export
+* [ ] PDF report export
 
-**Deliverables:**
+**Planned Deliverables:**
 
-* `app/dashboard.py` — Main Streamlit app
-* Supporting components
+* `app/dashboard.py`
+* Dashboard components
+* Visualization components
+* Report export functionality
 
 ---
 
 ### Phase 10 — Deployment
 
-**Objective:** Deploy to production (Render free tier).
+**Objective:** Deploy the construction risk prediction platform for demonstration and production-style use.
 
-* [ ] Create requirements for Render
-* [ ] Deploy Streamlit app to Render
-* [ ] Test in production
-* [ ] Monitor logs & performance
-* [ ] Optimize cold start time
+**Target Platform:**
 
-**Deliverables:**
+* Render free tier
+
+**Planned Tasks:**
+
+* [ ] Prepare production requirements
+* [ ] Configure application startup
+* [ ] Configure environment variables
+* [ ] Deploy Streamlit dashboard
+* [ ] Test production application
+* [ ] Monitor logs
+* [ ] Optimize startup time
+* [ ] Document deployment process
+
+**Planned Deliverables:**
 
 * Deployed live dashboard
 * Deployment documentation
+* Production configuration
 
 ---
 
 ## Known Gotchas
 
-### Data Leakage (Phase 4+)
+### Data Leakage
 
-**Issue:** ML models trained on future data will predict unrealistically well.
+**Issue:** ML models can produce unrealistic results if future information is included during prediction.
 
-**Prevention:** Always split by project, not by row. Train on past projects, validate/test on future projects.
+**Prevention:**
+
+* Split data by project rather than individual rows
+* Fit scalers only on training data
+* Respect prediction-time availability
+* Never use future events as prediction features
+
+---
 
 ### CPM Tolerance
 
-**Issue:** Which activities are "critical"? Float = 0.0 exactly? Or < 0.5 days?
+**Issue:** Floating-point calculations can make critical-path classification ambiguous.
 
-**Prevention:** Define and document tolerance threshold (e.g., float < 0.1 days = critical). Consistency matters.
+**Prevention:**
+
+* Use a documented float tolerance
+* Apply the same tolerance consistently
+* Validate critical activities through automated tests
+
+---
 
 ### What-if Scenario Logic
 
-**Issue:** Simply adding delay to project end date is wrong.
+**Issue:** Simply adding a delay to the final project completion date does not correctly model schedule behavior.
 
-**Fix:** Recalculate CPM for each scenario; track float consumption, path changes, and successor impacts.
+**Solution:**
+
+* Modify the affected activity
+* Recalculate CPM
+* Recalculate float
+* Identify downstream activities
+* Detect critical-path changes
+* Measure actual project completion impact
+
+---
 
 ### LLM Hallucination
 
-**Issue:** LLM might invent numbers ("50% chance of delay") without evidence.
+**Issue:** An LLM may invent numerical predictions or unsupported risk percentages.
 
-**Prevention:** LLM must call analysis tools; only use numerical results from CPM/ML models.
+**Prevention:**
+
+* LLM must call analytical tools
+* CPM remains the source of schedule calculations
+* ML model remains the source of delay predictions
+* Risk engine remains the source of risk scores
+* Scenario engine remains the source of what-if results
+* LLM can only explain validated tool outputs
+
+---
 
 ### Circular Dependencies
 
-**Issue:** Data might contain circular dependency chains (Activity A → B → C → A).
+**Issue:** Circular dependencies can make CPM calculations invalid.
 
-**Prevention:** Validate during Phase 2; flag and exclude circular chains before CPM (Phase 3).
+**Prevention:**
+
+* Validate dependency graph during Phase 2
+* Detect cycles before CPM
+* Reject invalid cyclic schedules
+
+---
 
 ### Large Model Files
 
-**Issue:** Trained `.pkl` or `.joblib` files can be 100MB+; don't commit to Git.
+**Issue:** Serialized ML models can become large.
 
-**Prevention:** `.gitignore` excludes `models/*.pkl` and `models/*.joblib`. Regenerate on deployment.
+**Prevention:**
+
+* Do not commit large generated model files to Git
+* Use `.gitignore`
+* Regenerate models when required
+* Keep reproducibility metadata in the repository
 
 ---
 
@@ -428,27 +680,49 @@ None — Phase 6 complete. Ready to begin Phase 7 (Mitigation Recommendations).
 
 ```powershell
 uv run ruff check --fix
-
+git status
 git add .
-
 git commit -m "Descriptive message"
-
 git push
 ```
 
 ### Running Tests
 
 ```powershell
-uv run pytest tests/ -v
+uv run pytest tests\ -v
 ```
 
-### Running Jupyter Notebooks
+### Running Risk Analysis
+
+```powershell
+uv run python scripts\run_risk_analysis.py
+```
+
+### Running What-if Scenarios
+
+```powershell
+uv run python scripts\run_scenarios.py
+```
+
+### Running CPM
+
+```powershell
+uv run python scripts\run_cpm.py
+```
+
+### Running Data Cleaning
+
+```powershell
+uv run python scripts\clean_scope.py
+```
+
+### Running Jupyter
 
 ```powershell
 uv run jupyter notebook
 ```
 
-### Linting & Formatting
+### Linting
 
 ```powershell
 uv run ruff check --fix
@@ -456,60 +730,308 @@ uv run ruff check --fix
 
 ---
 
-## Data Model (SCOPE v0.2)
+## Data Model — SCOPE v0.2
 
 ### Core Tables
 
-* **`projects.csv`** (100 projects)
+#### `projects.csv`
 
-  * Columns: project_id, project_type, floors, area_m2, complexity, contractor_capability, resource_availability, management_maturity, weather_exposure, supply_chain_exposure, technology_maturity, planned_duration_days, planned_cost
+Contains 100 construction projects.
 
-* **`activities.csv`** (9,279 activities)
+Important columns:
 
-  * Columns: project_id, activity_id, phase, activity_name, resource_type, planned_duration_days, quantity, unit_cost, planned_cost, criticality, status, critical_path, predecessor_count, successor_count
+```text
+project_id
+project_type
+floors
+area_m2
+complexity
+contractor_capability
+resource_availability
+management_maturity
+weather_exposure
+supply_chain_exposure
+technology_maturity
+planned_duration_days
+planned_cost
+```
 
-* **`dependencies.csv`** (18,176 dependencies)
+#### `activities.csv`
 
-  * Columns: project_id, predecessor_id, successor_id, relationship, lag_days
-  * **KEY TABLE for CPM graph construction**
+Contains 9,279 construction activities.
+
+Important columns:
+
+```text
+project_id
+activity_id
+phase
+activity_name
+resource_type
+planned_duration_days
+quantity
+unit_cost
+planned_cost
+criticality
+status
+critical_path
+predecessor_count
+successor_count
+```
+
+#### `dependencies.csv`
+
+Contains 18,176 activity dependencies.
+
+Important columns:
+
+```text
+project_id
+predecessor_id
+successor_id
+relationship
+lag_days
+```
+
+This is the key table used to construct the CPM dependency graph.
+
+---
 
 ### Supporting Tables
 
-* **`activity_states.csv`** (4M+ records) — Daily productivity, weather risk, site access
-* **`construction_memory.csv`** — Observed delays, rework, risk scores (**ML training labels**)
-* **`events.csv`**, **`environment.csv`**, **`decisions.csv`** — Context & features for ML
-* Plus 14 more tables for procurement, resources, friction, counterfactuals, etc.
+Important supporting data includes:
 
-### Data Loader
+```text
+activity_states.csv
+construction_memory.csv
+events.csv
+environment.csv
+decisions.csv
+resources.csv
+resource_allocation.csv
+procurement.csv
+rework.csv
+outcomes.csv
+```
 
-* **`src/data/loader.py`** — Reusable module for loading & validating all 25 CSV files
+These tables provide information about:
 
-  * Call: `data = load_raw_dataset()` → returns dict of DataFrames
-  * Validates referential integrity, row counts, column names, nulls, duplicates
-  * Getter functions: `get_projects(data)`, `get_activities(data)`, `get_dependencies(data)`, etc.
+* Productivity
+* Weather
+* Site access
+* Events
+* Resources
+* Procurement
+* Delays
+* Rework
+* Project outcomes
+* Construction risk factors
+
+---
+
+## Data Loader
+
+The reusable loader is:
+
+```text
+src/data/loader.py
+```
+
+Primary function:
+
+```python
+data = load_raw_dataset()
+```
+
+The loader provides access to the SCOPE v0.2 tables and supports validation of:
+
+* File availability
+* Column names
+* Null values
+* Duplicate records
+* Referential integrity
+* Project IDs
+* Activity IDs
+* Dependency relationships
+
+---
+
+## Overall System Architecture
+
+The current system follows this architecture:
+
+```text
+                 SCOPE v0.2 Dataset
+                         │
+                         ▼
+                Data Loading & Cleaning
+                         │
+                         ▼
+                   Feature Engineering
+                         │
+             ┌───────────┴───────────┐
+             ▼                       ▼
+        CPM Engine              ML Model
+             │                       │
+             │                Delay Prediction
+             │                       │
+             └───────────┬───────────┘
+                         ▼
+                  Risk Scoring
+                         │
+                         ▼
+                Activity Risk Analysis
+                         │
+                         ▼
+                Project Risk Summary
+                         │
+                         ▼
+                 Risk Report Generator
+                         │
+                         ▼
+                  What-if Simulation
+                         │
+                         ▼
+             Mitigation Recommendations
+                         │
+                         ▼
+                  LLM / Agentic AI
+                         │
+                         ▼
+                Streamlit Dashboard
+                         │
+                         ▼
+                    Deployment
+```
+
+---
+
+## Testing Status
+
+Current complete test suite:
+
+```text
+124 passed
+0 failed
+```
+
+Latest test command:
+
+```powershell
+uv run pytest tests\ -v
+```
+
+Latest result:
+
+```text
+124 passed in 92.18s
+```
+
+The test suite covers:
+
+* Data cleaning
+* Dataset validation
+* Referential integrity
+* Dependency validation
+* Cycle detection
+* CPM calculations
+* Float calculations
+* Critical path detection
+* ML data preparation
+* Risk analysis
+* Activity risk insights
+* Project risk summaries
+* Project reports
+* What-if simulation
+* Scenario validation
+
+---
+
+## Project Milestones
+
+```text
+Phase 0  ████████████████████ 100%  ✅
+Phase 1  ████████████████████ 100%  ✅
+Phase 2  ████████████████████ 100%  ✅
+Phase 3  ████████████████████ 100%  ✅
+Phase 4  ████████████████████ 100%  ✅
+Phase 5  ████████████████████ 100%  ✅
+Phase 6  ████████████████████ 100%  ✅
+Phase 7  ████████████████████ 100%  ✅
+Phase 8  ░░░░░░░░░░░░░░░░░░░░   0%  ⏳
+Phase 9  ░░░░░░░░░░░░░░░░░░░░   0%  ⏳
+Phase 10 ░░░░░░░░░░░░░░░░░░░░   0%  ⏳
+```
 
 ---
 
 ## Notes & Decisions
 
-* **Python 3.12** — Modern, fast, stable. All dependencies support it via `uv`.
-* **`uv` over `pip`** — Faster, more reliable, better dependency resolution.
-* **Free tier stack** — Groq (LLM), Open-Meteo (weather), Render (deployment), Neon/Supabase (optional DB).
-* **Project-level train/test split** — Prevents data leakage in Phase 4.
-* **NetworkX-free CPM implementation** — Deterministic CPM engine using Kahn's algorithm.
-* **Streamlit for dashboard** — Rapid prototyping, no frontend expertise needed.
-* **Single data loader module** — `src/data/loader.py` is reused across all phases (exploratory, CPM, ML, dashboard).
-* **Scenario simulation uses CPM recalculation** — Each what-if scenario is evaluated independently rather than manually shifting the project end date.
-* **LLM numerical grounding** — LLM/agent will only use numerical results returned by analysis tools.
+* **Python 3.12** — Stable and compatible with the project dependencies.
+* **uv** — Used for fast dependency management and reproducible environments.
+* **Project-level train/test split** — Prevents data leakage in ML.
+* **NetworkX-free CPM** — Deterministic implementation using Kahn's algorithm.
+* **Deterministic risk scoring** — Provides explainable and reproducible activity risk scores.
+* **CPM recalculation for scenarios** — Prevents incorrect schedule-impact calculations.
+* **Streamlit** — Selected for rapid dashboard development.
+* **Groq** — Planned for LLM/agentic analysis.
+* **Open-Meteo** — Planned for weather-related extensions.
+* **Render** — Planned deployment platform.
+* **LLM numerical grounding** — The LLM will not invent numerical results and must rely on analytical tools.
+* **Generated outputs** — Large processed datasets and model artifacts remain excluded from Git where appropriate.
+* **Automated testing** — The project currently has 124 passing tests.
+
+---
+
+## Final Project Goal
+
+The final system will provide construction project managers with an AI-assisted platform that can:
+
+1. Analyze construction schedules.
+2. Calculate the Critical Path.
+3. Predict activity-level delays using machine learning.
+4. Identify high-risk activities.
+5. Calculate project-level risk.
+6. Simulate what-if scenarios.
+7. Recommend mitigation strategies.
+8. Explain risks using an LLM agent.
+9. Provide an interactive Streamlit dashboard.
+10. Generate manager-friendly reports.
+
+The intended final workflow is:
+
+```text
+Construction Schedule
+        ↓
+Risk Detection
+        ↓
+Delay Prediction
+        ↓
+Critical Path Analysis
+        ↓
+What-if Simulation
+        ↓
+Mitigation Recommendation
+        ↓
+LLM Explanation
+        ↓
+Manager Decision Support
+```
 
 ---
 
 ## Team / Contact
 
-* **Project Owner:** Samiya Shaikh
-* **GitHub:** https://github.com/SarinaShaikh/AI-Construction-Project-Risk-Delay-Predictor
-* **Email:** [samiyaazgar@gmail.com](mailto:samiyaazgar@gmail.com)
+**Project Owner:** Samiya Shaikh
+
+**GitHub:**
+
+https://github.com/SarinaShaikh/AI-Construction-Project-Risk-Delay-Predictor
+
+**Email:**
+
+[samiyaazgar@gmail.com](mailto:samiyaazgar@gmail.com)
 
 ---
 
-**Last Updated:** Phase 6 Complete — Ready for Phase 7 (Mitigation Recommendations)
+**Last Updated:** Phase 7 Complete — Ready for Phase 8 (LLM / Agentic AI)
