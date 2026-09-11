@@ -8,10 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    # Phase 8: LLM/AI reporting layer (Groq API client + .env loading).
+    "groq>=1.7.0",
     "matplotlib>=3.11.1",
     "notebook>=7.6.2",
     "numpy>=2.5.2",
     "pandas>=3.0.5",
+    "python-dotenv>=1.2.3",
 ]
 
 [project.scripts]

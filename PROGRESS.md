@@ -115,7 +115,28 @@ construction-risk-predictor/
 
 ## In-Progress Phase
 
-None — Phase 2 complete. Awaiting approval to begin Phase 3 (CPM Engine).
+None — Phase 8 (LLM/AI reporting) integrated, awaiting commit approval.
+
+### Phase 8 — LLM Risk Analysis & AI Reports (branch phase7-integration)
+**Objective:** Add the friend's Phase 8 LLM/AI reporting layer (commit `d01fb48`) as an explanation/orchestration layer on top of the validated Phase 1–7 architecture.
+
+**Completed:**
+- ✅ Compatibility audit of `d01fb48` — Phase 8 consumes only `data/processed/risk/project_risk_summaries.csv` (our Phase 7 output; schema matched exactly, 11 required columns)
+- ✅ Extracted only the 7 Phase 8 files from the friend's history; did NOT merge `origin/main` (which contains the friend's rewritten Phases 4–6)
+- ✅ `src/llm/groq_client.py`, `risk_tools.py`, `prompt_builder.py`, `llm_risk_analyzer.py`, `ai_report_generator.py` — byte-identical to `d01fb48` (sha256-verified)
+- ✅ `scripts/generate_ai_reports.py` — friend's logic preserved + additive: `--summaries`/`--output-dir` CLI overrides, `--demo` offline mode (deterministic stub LLM client, no API call), integration notes
+- ✅ `tests/test_phase8_llm.py` — rewritten offline: fixture summaries CSV + stubbed Groq client; no real API calls, no pre-generated artifacts required
+- ✅ Dependencies added: `groq>=1.7.0`, `python-dotenv>=1.2.3` (installed into `.venv` via pip; `uv.lock` NOT regenerated — `uv` not installed here, run `uv lock` when available)
+- ✅ Package re-exports added in `src/llm/__init__.py` (Phase 7 exports unchanged)
+- ✅ API key handling: `GROQ_API_KEY` from environment/`.env` only (gitignored); no secrets committed; fail-fast test pins the missing-key behavior
+- ✅ Offline demo run: 15/15 project reports generated with no API key; all numbers verified exactly equal to Phase 7 summary values (no invention)
+
+**Results:** 310 tests passing (298 pre-existing + 12 Phase 8). Ruff clean. Phase 7 deterministic layer untouched.
+
+**Guarantees:**
+- The LLM does not calculate CPM, float, risk scores, or ML predictions — it explains the deterministic Phase 7 numbers only
+- The prompt forbids inventing values; report numbers come from `project_risk_summaries.csv` verbatim
+- Risk score ≠ actual schedule slippage; the target remains event-induced/disruption delay
 
 ---
 
